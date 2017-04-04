@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_song_playing"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/holo_blue_light"
+    android:gravity="center_horizontal"
+    tools:context="com.example.dell.simplemusicplayer.SongPlayingActivity">
+<TextView
+    android:padding="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textSize="24sp"
+    android:id="@+id/title_song"
+    android:layout_marginBottom="20dp"
+    android:gravity="center_horizontal"/>
+    <TextView
+        android:padding="8dp"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:id="@+id/artist_song"
+        android:layout_marginBottom="20dp"/>
+
+
+    <ImageView
+        android:background="@color/colorAccent"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:id="@+id/image"
+        android:adjustViewBounds="false"
+        android:layout_gravity="center_horizontal"/>
+
+<LinearLayout
+    android:layout_gravity="center_horizontal"
+    android:layout_marginTop="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <Button
+        android:background="@color/colorAccent"
+        android:padding="8dp"
+        android:gravity="center_horizontal"
+        android:layout_weight="1"
+        android:id="@+id/play"
+        android:layout_width="0dp"
+        android:text="PLAY"
+        android:textSize="20sp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"/>
+    <Button
+        android:background="@color/colorAccent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:gravity="center_horizontal"
+        android:layout_weight="1"
+        android:id="@+id/pause"
+        android:text="PAUSE"
+        android:layout_width="0dp"
+        android:textSize="20sp"
+       />
+</LinearLayout>
+</LinearLayout>
