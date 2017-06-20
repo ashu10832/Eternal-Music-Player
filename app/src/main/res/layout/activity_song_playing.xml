@@ -1,66 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+<LinearLayout
     android:id="@+id/activity_song_playing"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/holo_blue_light"
-    android:gravity="center_horizontal"
-    tools:context="com.example.dell.simplemusicplayer.SongPlayingActivity">
-<TextView
-    android:padding="8dp"
-    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textSize="24sp"
-    android:id="@+id/title_song"
-    android:layout_marginBottom="20dp"
-    android:gravity="center_horizontal"/>
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
     <TextView
-        android:padding="8dp"
-        android:gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:id="@+id/title_song"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:id="@+id/artist_song"
-        android:layout_marginBottom="20dp"/>
+        android:layout_marginBottom="16dp"
+        android:gravity="center_horizontal"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:maxLines="1"
+        android:padding="8dp"
+        android:textSize="20sp"
+        tools:text="Don't Let Me Down (feat. Daya) - www.9xDownloads.Com" />
 
+    <TextView
+        android:id="@+id/artist_song"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center_horizontal"
+        android:padding="4dp"
+        android:textSize="16sp"
+        tools:text="The Chainsmokers" />
 
     <ImageView
-        android:background="@color/colorAccent"
-        android:layout_width="256dp"
-        android:layout_height="256dp"
         android:id="@+id/image"
+        android:layout_width="196dp"
+        android:layout_height="196dp"
+        android:layout_gravity="center_horizontal"
         android:adjustViewBounds="false"
-        android:layout_gravity="center_horizontal"/>
+        android:background="@color/colorAccent" />
 
-<LinearLayout
-    android:layout_gravity="center_horizontal"
-    android:layout_marginTop="20dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
-    <Button
-        android:background="@color/colorAccent"
-        android:padding="8dp"
-        android:gravity="center_horizontal"
-        android:layout_weight="1"
-        android:id="@+id/play"
-        android:layout_width="0dp"
-        android:text="PLAY"
-        android:textSize="20sp"
+    <android.support.v7.widget.AppCompatSeekBar
+        android:id="@+id/seek_bar"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/current_time_textview"
+            android:textSize="16sp"
+            android:layout_weight="1"
+            android:layout_gravity="left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="2:07"/>
+        <TextView
+            android:id="@+id/duration_textview"
+            android:textSize="16sp"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="5:07"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"/>
-    <Button
-        android:background="@color/colorAccent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:gravity="center_horizontal"
-        android:layout_weight="1"
-        android:id="@+id/pause"
-        android:text="PAUSE"
-        android:layout_width="0dp"
-        android:textSize="20sp"
-       />
+        android:layout_gravity="bottom"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/play"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:text="PLAY"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/pause"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:text="PAUSE"
+            android:textSize="20sp" />
+    </LinearLayout>
 </LinearLayout>
-</LinearLayout>
+    </ScrollView>
