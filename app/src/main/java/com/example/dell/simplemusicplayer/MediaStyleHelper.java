@@ -17,7 +17,7 @@ public class MediaStyleHelper {
      * @param mediaSession Media session to get information.
      * @return A pre-built notification with information from the given media session.
      */
-    public static android.support.v7.app.NotificationCompat.Builder from(
+    public static NotificationCompat.Builder from(
             Context context, MediaSessionCompat mediaSession) {
         MediaControllerCompat controller = mediaSession.getController();
         MediaMetadataCompat mediaMetadata = controller.getMetadata();

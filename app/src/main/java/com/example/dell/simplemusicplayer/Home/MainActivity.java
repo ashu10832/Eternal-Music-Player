@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.dell.simplemusicplayer.Model.AudioTrack;
 import com.example.dell.simplemusicplayer.Model.Song;
 import com.example.dell.simplemusicplayer.Model.SongLoader;
 import com.example.dell.simplemusicplayer.R;
@@ -83,8 +84,8 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
         });
         songAdapter = new SongAdapter(this, songList, new SongAdapter.onSongClickListener() {
             @Override
-            public void onSongClick(Song song) {
-                presenter.onSongClicked(song);
+            public void onSongClick(int pos) {
+                presenter.onSongClicked(pos);
             }
         });
         recyclerView.setAdapter(songAdapter);
@@ -93,15 +94,21 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
 
     @Override
     public void showSongList(ArrayList<Song> songArrayList) {
+        songList = songArrayList;
         songAdapter.setSongList(songArrayList);
     }
 
     @Override
-    public void switchToPlayingActivity(Song song) {
-        Log.i(TAG, "switchToPlayingActivity:Title: " + song.getTitle() + " Data:" + song.getData() + " Artist:" + song.getArtist() + "Byte" + song.getImageByte());
+    public void switchToPlayingActivity(int position) {
+        Log.i(TAG, "switchToPlayingActivity: Position:" + position);
         Intent i = new Intent(MainActivity.this, SongPlayingActivity.class);
-        i.putExtra("SelectedSong", song);
-        overridePendingTransition(0, 0);
+        Log.i(TAG, "switchToPlayingActivity: " + songList);
+        ArrayList<AudioTrack> songs = new ArrayList<>();
+        for (Song song: songList) {
+            songs.add(new AudioTrack(song.getData()));
+        }
+        i.putExtra("SongList", songs);
+        i.putExtra("SelectedSongPosition",songList.get(position).getData());
         startActivity(i);
     }
 

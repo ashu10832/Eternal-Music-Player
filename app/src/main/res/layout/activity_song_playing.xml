@@ -10,6 +10,8 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:orientation="vertical">
+
+
     <TextView
         android:layout_marginTop="16dp"
         android:id="@+id/title_song"

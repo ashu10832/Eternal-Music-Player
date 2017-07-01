@@ -48,8 +48,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     }
 
     @Override
-    public void onBindViewHolder(SongViewHolder holder, int position) {
-        int pos =holder.getAdapterPosition();
+    public void onBindViewHolder(SongViewHolder holder, final int position) {
+        final int pos =holder.getAdapterPosition();
         final Song song = songList.get(pos);
         Glide.with(context).load(song.getImageByte()).diskCacheStrategy(DiskCacheStrategy.ALL).placeholder(R.drawable.ic_song_thumbnail).error(R.drawable.ic_song_thumbnail).into(holder.songThumbnail);
         holder.songTitle.setText(song.getTitle());
@@ -57,7 +57,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         holder.parentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                songClickListener.onSongClick(song);
+                songClickListener.onSongClick(pos);
             }
         });
 
@@ -98,7 +98,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     }
 
     interface onSongClickListener{
-        void onSongClick(Song song);
+        void onSongClick(int position);
     }
 }
 

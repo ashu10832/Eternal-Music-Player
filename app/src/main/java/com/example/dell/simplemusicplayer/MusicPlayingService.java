@@ -8,20 +8,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -39,14 +37,12 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
 
 
     private static final String TAG = "MusicPlayingService";
-    private final IBinder iBinder = new LocalBinder();
-    private MediaPlayer mediaPlayer;
+    private static MediaPlayer mediaPlayer;
     public static String mediaFile = null;
-    private int resumePosition;
+    private static int resumePosition;
     AudioManager audioManager;
     public int songDuration = -1;
     public static boolean isServiceStarted = false;
-
 
     MediaSessionCompat mediaSessionCompat;
     AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener;
@@ -85,8 +81,68 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             super.onPlayFromMediaId(mediaId, extras);
+            mediaFile = mediaId;
+            mediaSessionCompat.setActive(true);
+            setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
+            prepareMediaPlayer();
         }
+
+        @Override
+        public void onSeekTo(long pos) {
+            super.onSeekTo(pos);
+        }
+
+        @Override
+        public void onPlayFromUri(Uri uri, Bundle extras) {
+            super.onPlayFromUri(uri, extras);
+        }
+
+
     };
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i(TAG, "onCreate: ");
+        initMediaPlayer();
+        initMediaSession();
+        initNoisyReceiver();
+
+       /* mediaSessionCompat.setCallback(callback);
+        playbackStateCompat = playbackStateBuilder.build();
+        mediaSessionCompat.setPlaybackState(playbackStateCompat);
+        mediaMetadataCompat = mediaMetaDataBuilder.build();
+        mediaSessionCompat.setMetadata(mediaMetadataCompat);
+        mediaSessionCompat.getSessionToken();
+        mediaSessionCompat.setMetadata(mediaMetadataCompat);*/
+
+    }
+
+
+    public void initMediaPlayer() {
+      //  Log.i(TAG, "initMediaPlayer: " + mediaFile);
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setOnBufferingUpdateListener(this);
+        mediaPlayer.setOnCompletionListener(this);
+        mediaPlayer.setOnErrorListener(this);
+        mediaPlayer.setOnPreparedListener(this);
+        mediaPlayer.setOnSeekCompleteListener(this);
+        mediaPlayer.setOnInfoListener(this);
+        mediaPlayer.reset();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+       /* try {
+            mediaPlayer.setDataSource(mediaFile);
+            Log.i(TAG, "initMediaPlayer: ");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i(TAG, "initMediaPlayer: StopSelf");
+            stopSelf();
+        }*/
+       // mediaPlayer.prepareAsync();
+    }
+
+
 
 
     private void setMediaPlaybackState(int state) {
@@ -100,7 +156,7 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
         mediaSessionCompat.setPlaybackState(playbackstateBuilder.build());
     }
 
-    private void showPlayingNotification() {
+   /* private void showPlayingNotification() {
         NotificationCompat.Builder builder = MediaStyleHelper.from(MusicPlayingService.this, mediaSessionCompat);
         if( builder == null ) {
             return;
@@ -121,7 +177,7 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
         builder.setStyle(new NotificationCompat.MediaStyle().setShowActionsInCompactView(0).setMediaSession(mediaSessionCompat.getSessionToken()));
         builder.setSmallIcon(R.mipmap.ic_launcher);
         NotificationManagerCompat.from(this).notify(1, builder.build());
-    }
+    }*/
 
     private boolean successfullyRetrievedAudioFocus() {
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -133,13 +189,6 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
     }
 
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-
-        Log.i(TAG, "onBind: ");
-        return iBinder;
-    }
 
     @Nullable
     @Override
@@ -160,52 +209,22 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: StartId:" + startId + "Flags:" + flags);
-        if (isServiceStarted) {
-            Log.i(TAG, "onStartCommand: Service Already Running!");
-            MediaButtonReceiver.handleIntent(mediaSessionCompat, intent);
-            String newMediaFile = null;
-            try {
-                newMediaFile = intent.getExtras().getString("media");
-                if (!newMediaFile.equals(mediaFile)) {
-                    mediaFile = newMediaFile;
-                    //mediaPlayer.release();
-                    /*mediaPlayer = new MediaPlayer();
-                    mediaPlayer.setOnBufferingUpdateListener(this);
-                    mediaPlayer.setOnCompletionListener(this);
-                    mediaPlayer.setOnErrorListener(this);
-                    mediaPlayer.setOnPreparedListener(this);
-                    mediaPlayer.setOnSeekCompleteListener(this);
-                    mediaPlayer.setOnInfoListener(this);
-                    mediaPlayer.reset();
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);*/
-                    mediaPlayer.reset();
-                    try {
-                        mediaPlayer.setDataSource(newMediaFile);
-                        mediaPlayer.prepareAsync();
-                    } catch (IOException e) {
-                        Log.i(TAG, "onStartCommand: Exception");
-                        e.printStackTrace();
-                    }
-                }
-            } catch (NullPointerException e) {
-                Log.i(TAG, "onStartCommand: Exception");
-                stopSelf();
-            }
-        } else {
-            Log.i(TAG, "onStartCommand: Service Not Running!");
-            try {
-                mediaFile = intent.getExtras().getString("media");
 
-            } catch (NullPointerException e) {
-                Log.i(TAG, "onStartCommand: Exception");
-                stopSelf();
-            }
-            initMediaPlayer();
-            isServiceStarted = true;
+      /*  if (mediaFile == null){
+            mediaFile = intent.getStringExtra("SelectedSongData");
+            prepareMediaPlayer();
         }
+        else if (mediaFile.equals(intent.getStringExtra("SelectedSongData"))){
 
+        }
+        else{
+            mediaFile = intent.getStringExtra("SelectedSongData");
+                prepareMediaPlayer();
+            }
+            MediaButtonReceiver.handleIntent(mediaSessionCompat, intent);*/
         return START_STICKY;
     }
+
 
     @Override
     public void onDestroy() {
@@ -227,22 +246,6 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
         songDuration = mp.getDuration();
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(TAG, "onCreate: ");
-        initMediaPlayer();
-        initMediaSession();
-        initNoisyReceiver();
-
-        mediaSessionCompat.setCallback(callback);
-        playbackStateCompat = playbackStateBuilder.build();
-        mediaSessionCompat.setPlaybackState(playbackStateCompat);
-        mediaMetadataCompat = mediaMetaDataBuilder.build();
-        mediaSessionCompat.setMetadata(mediaMetadataCompat);
-        mediaSessionCompat.getSessionToken();
-
-    }
 
     private void initNoisyReceiver() {
         IntentFilter filter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -266,33 +269,24 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
 
     }
 
-    public void initMediaPlayer() {
-        Log.i(TAG, "initMediaPlayer: " + mediaFile);
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setOnBufferingUpdateListener(this);
-        mediaPlayer.setOnCompletionListener(this);
-        mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnSeekCompleteListener(this);
-        mediaPlayer.setOnInfoListener(this);
+    public void prepareMediaPlayer(){
         mediaPlayer.reset();
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         try {
             mediaPlayer.setDataSource(mediaFile);
-            Log.i(TAG, "initMediaPlayer: ");
+            mediaPlayer.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
-            Log.i(TAG, "initMediaPlayer: StopSelf");
-            stopSelf();
         }
-        mediaPlayer.prepareAsync();
+
     }
 
+
     public void playMedia() {
-        if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.setVolume(1.0f, 1.0f);
-            mediaPlayer.start();
+        if (successfullyRetrievedAudioFocus()) {
+            if (!mediaPlayer.isPlaying()) {
+                mediaPlayer.setVolume(1.0f, 1.0f);
+                mediaPlayer.start();
+            }
         }
     }
 
@@ -389,12 +383,6 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        Log.i(TAG, "onUnbind: ");
-        return super.onUnbind(intent);
-    }
-
-    @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
         return false;
     }
@@ -406,7 +394,7 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
 
     }
 
-    public int getCurrentPosition() {
+    public static int getCurrentPosition() {
         if (mediaPlayer.isPlaying())
             return mediaPlayer.getCurrentPosition();
         else {
@@ -414,8 +402,9 @@ public class MusicPlayingService extends MediaBrowserServiceCompat implements Me
         }
     }
 
-public class LocalBinder extends Binder {
-    public MusicPlayingService getService() {
+    public class LocalBinder extends Binder {
+
+        public MusicPlayingService getService() {
         Log.i(TAG, "getService: " + MusicPlayingService.this);
         return MusicPlayingService.this;
     }

@@ -1,5 +1,8 @@
 package com.example.dell.simplemusicplayer.Home;
 
+import android.content.Loader;
+import android.view.View;
+
 import com.example.dell.simplemusicplayer.Model.Song;
 import com.example.dell.simplemusicplayer.Model.SongLoader;
 
@@ -11,6 +14,7 @@ import java.util.logging.Handler;
 import needle.Needle;
 import needle.UiRelatedTask;
 
+import static android.R.id.home;
 import static android.R.id.list;
 
 /**
@@ -21,6 +25,7 @@ public class HomePresenter implements HomeContract.HomePresenter {
     private SongLoader songLoader;
     private HomeContract.HomeView view;
     ArrayList<Song> songArrayList;
+
 
 
     HomePresenter(SongLoader songLoader, HomeContract.HomeView homeView)
@@ -58,7 +63,7 @@ public class HomePresenter implements HomeContract.HomePresenter {
     }
 
     @Override
-    public void onSongClicked(Song song) {
-        view.switchToPlayingActivity(song);
+    public void onSongClicked(int position) {
+        view.switchToPlayingActivity(position);
     }
 }
