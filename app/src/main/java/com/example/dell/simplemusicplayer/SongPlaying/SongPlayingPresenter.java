@@ -1,17 +1,10 @@
 package com.example.dell.simplemusicplayer.SongPlaying;
 
-import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.ServiceConnection;
-import android.os.IBinder;
+import android.support.v4.media.MediaMetadataCompat;
 
-import com.example.dell.simplemusicplayer.Home.MainActivity;
 import com.example.dell.simplemusicplayer.Model.AudioTrack;
-import com.example.dell.simplemusicplayer.Model.Song;
-import com.example.dell.simplemusicplayer.MusicPlayingService;
+import com.example.dell.simplemusicplayer.MusicManagerContract;
 import com.example.dell.simplemusicplayer.MusicServiceManager;
-import com.example.dell.simplemusicplayer.Utils;
 
 import java.util.ArrayList;
 
@@ -19,57 +12,60 @@ import java.util.ArrayList;
  * Created by ashugupta on 14/06/17.
  */
 
-class SongPlayingPresenter implements SongPlayingContract.SongPlayingPresenter {
-    private MusicPlayingService musicService;
+class SongPlayingPresenter implements SongPlayingContract.SongPlayingPresenter, MusicManagerContract {
     private SongPlayingContract.SongPlayingView view;
-    MusicServiceManager manager;
+    private MusicServiceManager manager;
 
 
-    SongPlayingPresenter(SongPlayingActivity view,ArrayList<AudioTrack> songList,String songData){
-        this.view =  view;
-        manager = new MusicServiceManager(view,songList,songData);
+    SongPlayingPresenter(SongPlayingActivity view, ArrayList<AudioTrack> songList) {
+        this.view = view;
+        manager = new MusicServiceManager(view, songList);
     }
 
-    /*void attach(MusicPlayingService service) {
-        this.musicService = service;
-    }
-
-    void detach() {
-        this.musicService = null;
-        this.view = null;
-    }*/
-
-    void startPlaying(String songData){
-        if (songData!=null){
+    void startPlaying(String songData) {
+        if (songData != null) {
             manager.startPlayingFromData(songData);
         }
     }
 
+
     @Override
     public void onPlay() {
+        manager.play();
     }
 
     @Override
     public void onPause() {
+        manager.pause();
     }
 
     @Override
     public void seekMusicTo(int progress) {
+        manager.seekTo(progress);
     }
 
     @Override
     public void setCurrentPosition(int progress) {
-        view.setCurrentPosition(Utils.getFormattedTime(progress));
+        view.setCurrentPosition(progress);
     }
 
     @Override
     public void setMusicList(ArrayList<AudioTrack> songList) {
-        if (songList!=null){
+        if (songList != null) {
             manager.setMusicList(songList);
         }
     }
 
-    public void disconnect() {
+    void disconnect() {
         manager.unbindToService();
+    }
+
+    @Override
+    public void setMetaData(MediaMetadataCompat mediaMetadataCompat) {
+        view.setMetaData(mediaMetadataCompat);
+    }
+
+    int getCurrentPosition() {
+        return manager.getCurrentPosition();
     }
 }

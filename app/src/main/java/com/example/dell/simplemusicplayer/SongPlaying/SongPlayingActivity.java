@@ -4,10 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -17,8 +17,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.dell.simplemusicplayer.Model.AudioTrack;
-import com.example.dell.simplemusicplayer.Model.Song;
-import com.example.dell.simplemusicplayer.MusicPlayingService;
 import com.example.dell.simplemusicplayer.R;
 import com.example.dell.simplemusicplayer.Utils;
 
@@ -33,18 +31,12 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
     Button play, pause;
     TextView title, artist, currentPositionTextView, durationTextView;
     ImageView mediaArt;
-    private MusicPlayingService musicService;
     boolean serviceBound = false;
     SeekBar seekBar;
     Handler handler;
-    Song song;
     ArrayList<AudioTrack> songList;
-    BroadcastReceiver receiver;
     SongPlayingPresenter presenter;
-    int mCurentState;
     String mSelectedSongData;
-
-
 
 
     @Override
@@ -60,8 +52,9 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
             songList = getIntent().getParcelableArrayListExtra("SongList");
             mSelectedSongData = getIntent().getStringExtra("SelectedSongPosition");
         }
-        presenter = new SongPlayingPresenter(this,songList,mSelectedSongData);
-        //presenter.setMusicList(songList);
+        presenter = new SongPlayingPresenter(this, songList);
+        presenter.setMusicList(songList);
+        presenter.startPlaying(mSelectedSongData);
     }
 
 
@@ -86,40 +79,32 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
         Log.i(TAG, "onStop: ServiceBound: " + serviceBound);
         presenter.disconnect();
         handler.removeCallbacks(runnable);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter intentFilter = new IntentFilter(
-                "android.intent.action.MAIN");
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("METADATA-UPDATED"));
         Log.i(TAG, "onResume: ");
-        /*receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.i(TAG, "onReceive: ");
-                setSeekBarDuration(musicService.getFileDuration());
-                setTotalDuration(musicService.getFileDuration());
-            }
-        };
-        this.registerReceiver(receiver, intentFilter);*/
-        //presenter.startPlaying(mSelectedSongData);
+
     }
+
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            MediaMetadataCompat metadata = intent.getParcelableExtra("metadata");
+            Log.d(TAG, "onReceive: Metadata");
+            setMetaData(metadata);
+        }
+    };
 
     @Override
     protected void onPause() {
         super.onPause();
-//        this.unregisterReceiver(receiver);
     }
 
-    void setSeekBarDuration(int millis) {
-        seekBar.setMax(millis);
-    }
-
-
-    private void setTotalDuration(int fileDuration) {
-        durationTextView.setText(Utils.getFormattedTime(fileDuration));
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -160,41 +145,37 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            presenter.seekMusicTo(musicService.getCurrentPosition());
-            presenter.setCurrentPosition(musicService.getCurrentPosition());
+            setCurrentPosition(presenter.getCurrentPosition());
             handler.postDelayed(this, 1000);
         }
     };
-
-    private void playMusic(Song musicFile) {
-        setMetaData(musicFile);
-    }
 
     @Override
     public void showTitle(String title) {
         setTitle(title);
     }
 
-    public void setMetaData(Song song) {
-        Log.i(TAG, "setMetaData: ");
-        title.setText(song.getTitle());
-        artist.setText(song.getArtist());
-        if (song.getImageByte() != null) {
-            Bitmap bm = BitmapFactory.decodeByteArray(song.getImageByte(), 0, song.getImageByte().length);
-            mediaArt.setImageBitmap(bm);
-        }
+    @Override
+    public void setMetaData(MediaMetadataCompat mediaMetadataCompat) {
+        title.setText(mediaMetadataCompat.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
+        artist.setText(mediaMetadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
+        mediaArt.setImageBitmap(mediaMetadataCompat.getBitmap(MediaMetadataCompat.METADATA_KEY_ART));
+        durationTextView.setText(Utils.getFormattedTime((int) mediaMetadataCompat.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)));
+        seekBar.setMax((int) mediaMetadataCompat.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+        runnable.run();
     }
 
-    public void setCurrentPosition(String progress) {
-        currentPositionTextView.setText(progress);
+
+    public void setCurrentPosition(int progress) {
+        currentPositionTextView.setText(Utils.getFormattedTime(progress));
+        seekBar.setProgress(progress);
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
         if (fromUser) {
-            handler.removeCallbacks(runnable);
-            presenter.setCurrentPosition(progress);
+            setCurrentPosition(progress);
         }
     }
 
@@ -206,6 +187,5 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         presenter.seekMusicTo(seekBar.getProgress());
-        runnable.run();
     }
 }

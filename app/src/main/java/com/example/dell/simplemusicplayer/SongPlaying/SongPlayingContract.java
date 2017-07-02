@@ -1,5 +1,7 @@
 package com.example.dell.simplemusicplayer.SongPlaying;
 
+import android.support.v4.media.MediaMetadataCompat;
+
 import com.example.dell.simplemusicplayer.Model.AudioTrack;
 import com.example.dell.simplemusicplayer.Model.Song;
 
@@ -18,9 +20,9 @@ public interface SongPlayingContract {
 
         void showTitle(String title);
 
-        void setMetaData(Song song);
+        void setMetaData(MediaMetadataCompat mediaMetadataCompat);
 
-        void setCurrentPosition(String position);
+        void setCurrentPosition(int position);
 
 
 
