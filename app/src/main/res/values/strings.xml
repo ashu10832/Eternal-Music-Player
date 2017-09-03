@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Simple Music Player</string>
     <string name="mediaart">MediaArt</string>
+    <string name="play_pause_button">Play/Pause Button</string>
 </resources>

@@ -18,7 +18,6 @@ public interface SongPlayingContract {
     interface SongPlayingView{
 
 
-        void showTitle(String title);
 
         void setMetaData(MediaMetadataCompat mediaMetadataCompat);
 
@@ -36,9 +35,7 @@ public interface SongPlayingContract {
 
         void seekMusicTo(int progress);
 
-        void setCurrentPosition(int progress);
 
 
-        void setMusicList(ArrayList<AudioTrack> songList);
     }
 }

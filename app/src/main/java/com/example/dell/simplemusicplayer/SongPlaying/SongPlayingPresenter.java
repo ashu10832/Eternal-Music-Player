@@ -44,17 +44,7 @@ class SongPlayingPresenter implements SongPlayingContract.SongPlayingPresenter, 
         manager.seekTo(progress);
     }
 
-    @Override
-    public void setCurrentPosition(int progress) {
-        view.setCurrentPosition(progress);
-    }
 
-    @Override
-    public void setMusicList(ArrayList<AudioTrack> songList) {
-        if (songList != null) {
-            manager.setMusicList(songList);
-        }
-    }
 
     void disconnect() {
         manager.unbindToService();

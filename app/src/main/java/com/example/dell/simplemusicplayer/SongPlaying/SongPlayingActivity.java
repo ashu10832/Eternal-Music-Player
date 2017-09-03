@@ -10,12 +10,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.example.dell.simplemusicplayer.MetadataManager;
 import com.example.dell.simplemusicplayer.Model.AudioTrack;
 import com.example.dell.simplemusicplayer.R;
 import com.example.dell.simplemusicplayer.Utils;
@@ -43,6 +45,8 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song_playing);
+
+        getSupportActionBar().hide();
         initializeUI();
         if (savedInstanceState != null) {
             songList = savedInstanceState.getParcelableArrayList("SongList");
@@ -53,7 +57,7 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
             mSelectedSongData = getIntent().getStringExtra("SelectedSongPosition");
         }
         presenter = new SongPlayingPresenter(this, songList);
-        presenter.setMusicList(songList);
+        setMetaData(MetadataManager.getMetadata(mSelectedSongData));
         presenter.startPlaying(mSelectedSongData);
     }
 
@@ -61,13 +65,13 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
     }
 
 
     @Override
     protected void onStart() {
         super.onStart();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("METADATA-UPDATED"));
         Log.i(TAG, "onStart: ");
 
     }
@@ -78,14 +82,20 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
         super.onStop();
         Log.i(TAG, "onStop: ServiceBound: " + serviceBound);
         presenter.disconnect();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroy: ");
         handler.removeCallbacks(runnable);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("METADATA-UPDATED"));
         Log.i(TAG, "onResume: ");
 
     }
@@ -103,6 +113,7 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "onPause: ");
     }
 
 
@@ -138,6 +149,13 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
         title = (TextView) findViewById(title_song);
         artist = (TextView) findViewById(artist_song);
         mediaArt = (ImageView) findViewById(R.id.image);
+        mediaArt.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return false;
+            }
+        });
+
         handler = new Handler();
     }
 
@@ -150,16 +168,17 @@ public class SongPlayingActivity extends AppCompatActivity implements SeekBar.On
         }
     };
 
-    @Override
-    public void showTitle(String title) {
-        setTitle(title);
-    }
+
 
     @Override
     public void setMetaData(MediaMetadataCompat mediaMetadataCompat) {
         title.setText(mediaMetadataCompat.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
         artist.setText(mediaMetadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
-        mediaArt.setImageBitmap(mediaMetadataCompat.getBitmap(MediaMetadataCompat.METADATA_KEY_ART));
+        if (mediaMetadataCompat.getBitmap(MediaMetadataCompat.METADATA_KEY_ART) != null)
+            mediaArt.setImageBitmap(mediaMetadataCompat.getBitmap(MediaMetadataCompat.METADATA_KEY_ART));
+        else {
+            mediaArt.setImageResource(R.drawable.ic_song_thumbnail);
+        }
         durationTextView.setText(Utils.getFormattedTime((int) mediaMetadataCompat.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)));
         seekBar.setMax((int) mediaMetadataCompat.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
         runnable.run();

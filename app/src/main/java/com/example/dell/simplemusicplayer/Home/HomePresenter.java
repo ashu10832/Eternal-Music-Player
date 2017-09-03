@@ -1,10 +1,15 @@
 package com.example.dell.simplemusicplayer.Home;
 
+import android.content.Context;
 import android.content.Loader;
+import android.graphics.drawable.Drawable;
+import android.support.v4.media.MediaMetadataCompat;
 import android.view.View;
 
+import com.example.dell.simplemusicplayer.Model.AudioTrack;
 import com.example.dell.simplemusicplayer.Model.Song;
 import com.example.dell.simplemusicplayer.Model.SongLoader;
+import com.example.dell.simplemusicplayer.MusicServiceManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +30,7 @@ public class HomePresenter implements HomeContract.HomePresenter {
     private SongLoader songLoader;
     private HomeContract.HomeView view;
     ArrayList<Song> songArrayList;
+    MusicServiceManager manager;
 
 
 
@@ -34,6 +40,17 @@ public class HomePresenter implements HomeContract.HomePresenter {
         view = homeView;
         view.showTitle("Music Library");
     }
+
+    void attachManager(Context context, ArrayList<AudioTrack> songList){
+        manager = new MusicServiceManager(context, songList);
+    }
+
+    void startPlaying(String songData) {
+        if (songData != null) {
+            manager.startPlayingFromData(songData);
+        }
+    }
+
 
     @Override
     public void getAllSongs() {
@@ -60,6 +77,25 @@ public class HomePresenter implements HomeContract.HomePresenter {
                 view.hideRefresh();
             }
         });
+    }
+
+    void disconnect() {
+        manager.unbindToService();
+    }
+
+    public void onPlay() {
+        manager.play();
+    }
+
+
+    public void onPause() {
+        manager.pause();
+    }
+
+
+
+    public void setMetaData(MediaMetadataCompat mediaMetadataCompat) {
+        view.setMetaData(mediaMetadataCompat);
     }
 
     @Override

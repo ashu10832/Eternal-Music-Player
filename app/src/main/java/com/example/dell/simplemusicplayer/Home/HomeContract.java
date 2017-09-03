@@ -1,5 +1,7 @@
 package com.example.dell.simplemusicplayer.Home;
 
+import android.support.v4.media.MediaMetadataCompat;
+
 import com.example.dell.simplemusicplayer.Model.Song;
 import com.example.dell.simplemusicplayer.SongPlaying.SongPlayingContract;
 
@@ -31,6 +33,6 @@ public interface HomeContract {
         void hideRefresh();
 
 
-
+        void setMetaData(MediaMetadataCompat mediaMetadataCompat);
     }
 }

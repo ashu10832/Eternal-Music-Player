@@ -10,6 +10,7 @@ import android.os.RemoteException;
 import android.support.annotation.RequiresApi;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
@@ -38,8 +39,9 @@ public class MusicServiceManager {
 
     public MusicServiceManager(Context context, ArrayList<AudioTrack> songList) {
         this.context = context;
-        this.songList = songList;
         initializeMediaBrowser();
+        setMusicList(songList);
+
     }
 
 
