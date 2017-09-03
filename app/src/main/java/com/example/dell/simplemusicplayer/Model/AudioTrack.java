@@ -1,42 +1,51 @@
-package com.example.dell.simplemusicplayer.Model
+package com.example.dell.simplemusicplayer.Model;
 
-import android.os.Parcel
-import android.os.Parcelable
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by ashugupta on 30/06/17.
  */
 
-class AudioTrack : Parcelable {
+public class AudioTrack implements Parcelable {
 
-    var data: String? = null
+    private String data;
 
-    constructor(data: String) {
-        this.data = data
+    public String getData() {
+        return data;
     }
 
-    private constructor(`in`: Parcel) {
-        data = `in`.readString()
+    public void setData(String data) {
+        this.data = data;
     }
 
-    override fun describeContents(): Int {
-        return 0
+    public AudioTrack(String data) {
+        this.data = data;
     }
 
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeString(data)
+    private AudioTrack(Parcel in) {
+        data = in.readString();
     }
 
-    companion object {
-
-        val CREATOR: Parcelable.Creator<AudioTrack> = object : Parcelable.Creator<AudioTrack> {
-            override fun createFromParcel(`in`: Parcel): AudioTrack {
-                return AudioTrack(`in`)
-            }
-
-            override fun newArray(size: Int): Array<AudioTrack> {
-                return arrayOfNulls(size)
-            }
+    public static final Creator<AudioTrack> CREATOR = new Creator<AudioTrack>() {
+        @Override
+        public AudioTrack createFromParcel(Parcel in) {
+            return new AudioTrack(in);
         }
+
+        @Override
+        public AudioTrack[] newArray(int size) {
+            return new AudioTrack[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(data);
     }
 }

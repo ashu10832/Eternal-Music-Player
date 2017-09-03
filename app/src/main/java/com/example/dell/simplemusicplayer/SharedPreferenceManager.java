@@ -9,18 +9,46 @@ import android.content.SharedPreferences;
 
 public class SharedPreferenceManager {
     Context context;
+    private String SHARED_PREFERENCES_NAME = "Shared_preferences";
 
-    void get(Context context){
-        SharedPreferences sharedPreferences = context.getSharedPreferences("Ashu",Context.MODE_PRIVATE);
-        sharedPreferences.getFloat("Asfasf",0);
-    }
 
-    void put(Context context){
-
-        SharedPreferences.Editor editor = context.getSharedPreferences("",Context.MODE_PRIVATE).edit();
-        editor.putString("key", "value");
-        editor.commit();
+    public SharedPreferenceManager(Context context){
+        this.context = context;
     }
 
 
+
+    public int getPlaybackState(){
+        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return preferences.getInt("PlaybackState",-1);
+    }
+
+
+    public String getCurrentSong(){
+        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return preferences.getString("CurrentMusicFile",null);
+    }
+
+   public void setPlaybackState(int PlaybackState){
+        SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFERENCES_NAME,Context.MODE_PRIVATE).edit();
+        editor.putInt("PlaybackState", PlaybackState);
+        editor.apply();
+    }
+
+
+    public void setCurrentSong(String mediaFile) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFERENCES_NAME,Context.MODE_PRIVATE).edit();
+        editor.putString("CurrentMusicFile", mediaFile);
+        editor.apply();
+    }
+    public void setCurrentPostion(int position){
+        SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFERENCES_NAME,Context.MODE_PRIVATE).edit();
+        editor.putInt("CurrentPostion",position);
+        editor.apply();
+    }
+
+    public int getCurrentPosittion(){
+        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return preferences.getInt("CurrentPosition",-1);
+    }
 }

@@ -10,7 +10,6 @@ import android.os.RemoteException;
 import android.support.annotation.RequiresApi;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
@@ -79,7 +78,7 @@ public class MusicServiceManager {
     };
 
 
-    private MediaBrowserCompat.ConnectionCallback mMediaBrowerCompatCallback = new MediaBrowserCompat.ConnectionCallback() {
+    private MediaBrowserCompat.ConnectionCallback mMediaBrowserCompatCallback = new MediaBrowserCompat.ConnectionCallback() {
 
         @Override
         public void onConnected() {
@@ -104,13 +103,16 @@ public class MusicServiceManager {
 
 
     private void initializeMediaBrowser() {
-        mMediaBrowserCompat = new MediaBrowserCompat(context, new ComponentName(context, MusicPlayingService.class), mMediaBrowerCompatCallback, null);
+        mMediaBrowserCompat = new MediaBrowserCompat(context, new ComponentName(context, MusicPlayingService.class), mMediaBrowserCompatCallback, null);
         mMediaBrowserCompat.connect();
     }
 
 
     public void unbindToService() {
+        //mMediaControllerCompat.getTransportControls().sendCustomAction("STOP_SERVICE",null);
         mMediaBrowserCompat.disconnect();
+        Log.i(TAG, "unbindToService: ");
+
     }
 
 

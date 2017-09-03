@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -26,13 +27,18 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.dell.simplemusicplayer.MetadataManager;
 import com.example.dell.simplemusicplayer.Model.AudioTrack;
 import com.example.dell.simplemusicplayer.Model.Song;
 import com.example.dell.simplemusicplayer.Model.SongLoader;
+import com.example.dell.simplemusicplayer.MusicServiceManager;
 import com.example.dell.simplemusicplayer.R;
+import com.example.dell.simplemusicplayer.SharedPreferenceManager;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
+
+import static com.example.dell.simplemusicplayer.MetadataManager.getMetadata;
 
 public class MainActivity extends AppCompatActivity implements HomeContract.HomeView {
 
@@ -49,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
     ImageView umanoBarIcon;
     TextView umanoBarTitle;
     TextView umanoBarArtist;
+    Handler handler;
     boolean isPlaying = false;
     ArrayList<AudioTrack> songs = null;
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -65,9 +72,8 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        presenter = new HomePresenter(new SongLoader(this), this);
+        presenter = new HomePresenter(new SongLoader(this), this,new SharedPreferenceManager(this));
         askForPermission();
-
     }
 
     void askForPermission() {
@@ -77,8 +83,6 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
         } else {
             init();
             presenter.getAllSongs();
-
-
         }
     }
 
@@ -109,18 +113,24 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
         umanoBarIcon = (ImageView) findViewById(R.id.umano_bar_icon);
         umanoBarArtist = (TextView) findViewById(R.id.umano_bar_artist);
         umanoBarTitle = (TextView) findViewById(R.id.umano_bar_title);
-
+        handler = new Handler();
         umanoBarIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isPlaying) {
-                    presenter.onPause();
-                    umanoBarIcon.setImageResource(R.drawable.ic_play_arrow_black_24dp);
-                    isPlaying = false;
-                } else {
-                    presenter.onPlay();
+                if (presenter.isSongNull()){
+                    presenter.startPlaying(songList.get(0).getData());
                     umanoBarIcon.setImageResource(R.drawable.ic_pause_black_24dp);
-                    isPlaying = true;
+                }
+                else {
+                    if (presenter.isPlaying()) {
+                        presenter.onPause();
+                        umanoBarIcon.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+                        isPlaying = false;
+                    } else {
+                        presenter.onPlay();
+                        umanoBarIcon.setImageResource(R.drawable.ic_pause_black_24dp);
+                        isPlaying = true;
+                    }
                 }
             }
         });
@@ -164,6 +174,9 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
         });
         recyclerView.setAdapter(songAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+
+
     }
 
     @Override
@@ -177,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "onDestroy: ");
+        presenter.disconnect();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
@@ -189,8 +203,25 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
         for (Song song : songList) {
             songs.add(new AudioTrack(song.getData()));
         }
-        presenter.attachManager(this, songs);
+        presenter.attachManager(new MusicServiceManager(this,songs));
+        if (!presenter.isSongNull()){
+            String mediaData = presenter.getCurrentSong();
+            Log.i(TAG, "init: MediaData: " + mediaData);
+            MediaMetadataCompat metadataCompat = MetadataManager.getMetadata(mediaData);
+            setMetaData(metadataCompat);
+        }
+        else{
+            umanoBarThumbnail.setImageResource(R.drawable.ic_song_thumbnail);
+        }
+        umanoBarIcon.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+        /*if (presenter.isPlaying()){
+            umanoBarIcon.setImageResource(R.drawable.ic_pause_black_24dp);
+        }
+        else{
+            umanoBarIcon.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+        }*/
     }
+
 
     @Override
     public void switchToPlayingActivity(int position) {
@@ -226,7 +257,6 @@ public class MainActivity extends AppCompatActivity implements HomeContract.Home
     @Override
     public void hideRefresh() {
         swipeRefreshLayout.setRefreshing(false);
-
     }
 
     @Override
