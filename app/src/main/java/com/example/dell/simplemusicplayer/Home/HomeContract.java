@@ -1,6 +1,9 @@
 package com.example.dell.simplemusicplayer.Home;
 
+import android.support.v4.media.MediaMetadataCompat;
+
 import com.example.dell.simplemusicplayer.Model.Song;
+import com.example.dell.simplemusicplayer.SongPlaying.SongPlayingContract;
 
 import java.util.ArrayList;
 
@@ -12,14 +15,14 @@ public interface HomeContract {
     interface HomePresenter{
         void getAllSongs();
 
-        void onSongClicked(Song song);
+        void onSongClicked(int position);
     }
     interface HomeView{
 
 
         void showSongList(ArrayList<Song> songArrayList);
 
-        void switchToPlayingActivity(Song song);
+        void switchToPlayingActivity(int position);
 
         void showTitle(String title);
 
@@ -30,6 +33,6 @@ public interface HomeContract {
         void hideRefresh();
 
 
-
+        void setMetaData(MediaMetadataCompat mediaMetadataCompat);
     }
 }

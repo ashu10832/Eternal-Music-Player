@@ -1,13 +1,17 @@
 package com.example.dell.simplemusicplayer;
 
 import android.content.Context;
-import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.NotificationCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
+
+import static android.R.attr.description;
+import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 
 public class MediaStyleHelper {
     /**
@@ -17,11 +21,14 @@ public class MediaStyleHelper {
      * @param mediaSession Media session to get information.
      * @return A pre-built notification with information from the given media session.
      */
-    public static android.support.v7.app.NotificationCompat.Builder from(
+    public static NotificationCompat.Builder from(
             Context context, MediaSessionCompat mediaSession) {
         MediaControllerCompat controller = mediaSession.getController();
         MediaMetadataCompat mediaMetadata = controller.getMetadata();
+        Log.i(TAG, "from: METADATA: "+ mediaMetadata);
+
         MediaDescriptionCompat description = mediaMetadata.getDescription();
+
  
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder

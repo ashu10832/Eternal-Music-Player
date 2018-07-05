@@ -15,7 +15,7 @@ import static android.R.attr.theme;
  */
 @SuppressWarnings("serial")
 
-/*public class Song implements Parcelable {
+public class Song implements Parcelable {
     private String title;
     private String artist;
     private String data;
@@ -96,7 +96,7 @@ import static android.R.attr.theme;
         this.imageByte = imageByte;
     }
 }
-*/
+/*
 public class Song implements Serializable{
     private String title;
     private String artist;
@@ -141,4 +141,4 @@ public class Song implements Serializable{
     public void setImageByte(byte[] imageByte) {
         this.imageByte = imageByte;
     }
-}
+}*/
